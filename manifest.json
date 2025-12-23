@@ -1,0 +1,18 @@
+
+{
+  "name": "Monarch OS",
+  "short_name": "Monarch",
+  "description": "Self-Improvement Neural Operating System",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/ios-filled/512/8b5cf6/crown.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

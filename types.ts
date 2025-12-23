@@ -1,5 +1,5 @@
 
-export type Category = 'Fitness' | 'Study' | 'Skill' | 'Mind' | 'Health' | 'Discipline' | 'Social';
+export type Category = 'Strength' | 'Endurance' | 'Intelligence' | 'Focus' | 'Discipline' | 'Dexterity' | 'Relationship';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'INSANE';
 

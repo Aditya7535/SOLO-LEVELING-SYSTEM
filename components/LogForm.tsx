@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Category, Difficulty, Log } from '../types';
-import { CATEGORIES, DIFFICULTIES, CATEGORY_STAT_MAP, CATEGORY_COLORS } from '../constants';
-import { Plus, X, ChevronRight, Activity } from 'lucide-react';
+import { CATEGORIES, DIFFICULTIES, CATEGORY_STAT_MAP, CATEGORY_COLORS, DEFAULT_CATEGORY_UNITS } from '../constants';
+import { db } from '../services/db';
+import { Plus, X, ChevronRight, Activity, Save } from 'lucide-react';
 
 interface LogFormProps {
   onAdd: (log: Omit<Log, 'id' | 'date' | 'completed'>) => void;
@@ -11,10 +12,28 @@ interface LogFormProps {
 
 const LogForm: React.FC<LogFormProps> = ({ onAdd, onClose }) => {
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<Category>('Discipline');
+  const [category, setCategory] = useState<Category>(CATEGORIES[0]);
   const [quantity, setQuantity] = useState(1);
-  const [unit, setUnit] = useState('reps');
+  const [unit, setUnit] = useState(DEFAULT_CATEGORY_UNITS[CATEGORIES[0]]);
   const [difficulty, setDifficulty] = useState<Difficulty>('MEDIUM');
+  const [unitPrefs, setUnitPrefs] = useState<Record<string, string>>({});
+
+  // Load user preferences on mount
+  useEffect(() => {
+    const loadPrefs = async () => {
+      const prefs = await db.getUnitPreferences();
+      setUnitPrefs(prefs);
+      setUnit(prefs[category] || DEFAULT_CATEGORY_UNITS[category]);
+    };
+    loadPrefs();
+  }, [category]);
+
+  const handleSaveDefaultUnit = async () => {
+    if (!unit.trim()) return;
+    await db.saveUnitPreference(category, unit);
+    setUnitPrefs(prev => ({ ...prev, [category]: unit }));
+    if ('vibrate' in navigator) navigator.vibrate(20);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +63,7 @@ const LogForm: React.FC<LogFormProps> = ({ onAdd, onClose }) => {
             <input
               autoFocus
               type="text"
-              placeholder="e.g., 5km Morning Run"
+              placeholder="e.g., Morning Training Session"
               className="w-full bg-transparent border-b border-zinc-800 py-3 text-xl font-bold focus:border-violet-500 outline-none placeholder:text-zinc-800 text-zinc-100"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -56,25 +75,22 @@ const LogForm: React.FC<LogFormProps> = ({ onAdd, onClose }) => {
             <label className="text-[10px] font-bold uppercase text-zinc-600 mono ml-1 flex items-center gap-2">
               <Activity size={12} /> Neural Stat Connection
             </label>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {CATEGORIES.map(cat => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${
+                  className={`flex flex-col p-3 rounded-lg border transition-all text-left ${
                     category === cat 
                     ? `${CATEGORY_COLORS[cat]} ring-1 ring-violet-500/50 scale-[1.02]` 
                     : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
                   }`}
                 >
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold mono uppercase tracking-tighter">{cat}</span>
-                    <span className="text-[9px] opacity-70 mt-1">
-                      {CATEGORY_STAT_MAP[cat].map(s => `+${s}`).join(' ')}
-                    </span>
-                  </div>
-                  {category === cat && <div className="w-1.5 h-1.5 bg-current rounded-full animate-pulse"></div>}
+                  <span className="text-[11px] font-black mono uppercase tracking-tighter">{cat}</span>
+                  <span className="text-[8px] opacity-70 mt-0.5 mono">
+                    {CATEGORY_STAT_MAP[cat].map(s => `+${s.toUpperCase()}`)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -94,18 +110,28 @@ const LogForm: React.FC<LogFormProps> = ({ onAdd, onClose }) => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase text-zinc-600 mono ml-1">Quantity</label>
+              <div className="flex justify-between items-center ml-1">
+                <label className="text-[10px] font-bold uppercase text-zinc-600 mono">Quantity & Unit</label>
+                <button 
+                  type="button"
+                  onClick={handleSaveDefaultUnit}
+                  className="text-[9px] text-zinc-500 hover:text-violet-400 flex items-center gap-1 mono uppercase"
+                  title="Save as default unit for this category"
+                >
+                  <Save size={10} /> Set Default
+                </button>
+              </div>
               <div className="flex">
                 <input
                   type="number"
-                  className="w-2/3 bg-zinc-900 border border-zinc-800 p-3 rounded-l-lg text-xs mono outline-none focus:ring-1 ring-violet-500 text-zinc-300"
+                  className="w-1/2 bg-zinc-900 border border-zinc-800 p-3 rounded-l-lg text-xs mono outline-none focus:ring-1 ring-violet-500 text-zinc-300"
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
                 />
                 <input
                   type="text"
                   placeholder="unit"
-                  className="w-1/3 bg-zinc-800 border-y border-r border-zinc-800 p-3 rounded-r-lg text-[10px] mono outline-none text-zinc-500"
+                  className="w-1/2 bg-zinc-800 border-y border-r border-zinc-800 p-3 rounded-r-lg text-[10px] mono outline-none text-zinc-400 focus:text-zinc-100"
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
                 />

@@ -13,7 +13,7 @@ export const generateQuests = async (logs: Log[], stats: UserStats): Promise<AIQ
     Stats available: strength, endurance, intelligence, focus, discipline, dexterity, relationship.
     
     Generate 2 personalized "Daily Quests". 
-    CRITICAL: If the 'relationship' stat is lower than others, prioritize 'Social' category tasks (e.g., reaching out to mentors, networking, or helping others).
+    CRITICAL: If the 'relationship' stat is lower than others, prioritize 'Relationship' category tasks (e.g., reaching out to mentors, networking, or helping others).
     Focus on balancing the weakest stat or pushing consistency.
     Respond in strict JSON format.
   `;
@@ -56,12 +56,11 @@ export const generateSystemInterruption = async (lastLog: Log, stats: UserStats)
     Global Stats: ${JSON.stringify(stats)}
 
     Create an URGENT SYSTEM INTERRUPTION.
-    - If the activity was 'Study', create a 'QUIZ' related to general knowledge or logic.
-    - If the activity was 'Fitness', create an 'EMERGENCY_TASK' (a physical movement).
-    - If the activity was 'Social', create a 'QUIZ' about emotional intelligence, empathy, or social dynamics.
-    - If the activity was 'Mind', create a 'QUIZ' about focus or awareness.
+    - If the activity was 'Intelligence', create a 'QUIZ' related to general knowledge or logic.
+    - If the activity was 'Strength' or 'Endurance', create an 'EMERGENCY_TASK' (a physical movement).
+    - If the activity was 'Relationship', create a 'QUIZ' about emotional intelligence, empathy, or social dynamics.
+    - If the activity was 'Focus', create a 'QUIZ' about mindfulness or logic.
     
-    The 'relationship' stat must be integrated into the rewards if the task involves social or emotional labor.
     The reward must be proportional to stat weakness.
     Respond in strict JSON format matching the Interruption interface.
   `;
@@ -109,9 +108,9 @@ export const getSystemAnalysis = async (query: string, logs: Log[], stats: UserS
     
     Rules:
     - Respond like a cold, efficient system notification.
-    - Reference specific logs (e.g., "Your Relationship stat increased because you logged 'Social' activity 'Dinner with mentor'").
+    - Reference specific logs (e.g., "Your Relationship stat increased because you logged 'Relationship' activity 'Family Dinner'").
     - Explain causality explicitly. 
-    - Identify if the user is neglecting their 'Social' circle or 'Fitness' base.
+    - Identify if the user is neglecting specific attributes.
     - No fluff. No emojis.
   `;
 

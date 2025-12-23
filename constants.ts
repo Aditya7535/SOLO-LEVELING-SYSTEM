@@ -8,24 +8,44 @@ export const DIFFICULTY_MULTIPLIERS: Record<Difficulty, number> = {
   INSANE: 8
 };
 
+export const CATEGORIES: Category[] = [
+  'Strength',
+  'Endurance',
+  'Intelligence',
+  'Focus',
+  'Discipline',
+  'Dexterity',
+  'Relationship'
+];
+
 export const CATEGORY_STAT_MAP: Record<Category, string[]> = {
-  Fitness: ['strength', 'endurance'],
-  Study: ['intelligence'],
-  Skill: ['dexterity'],
-  Mind: ['focus'],
-  Health: ['endurance'],
+  Strength: ['strength'],
+  Endurance: ['endurance'],
+  Intelligence: ['intelligence'],
+  Focus: ['focus'],
   Discipline: ['discipline'],
-  Social: ['relationship']
+  Dexterity: ['dexterity'],
+  Relationship: ['relationship']
+};
+
+export const DEFAULT_CATEGORY_UNITS: Record<Category, string> = {
+  Strength: 'reps',
+  Endurance: 'km',
+  Intelligence: 'pages',
+  Focus: 'minutes',
+  Discipline: 'tasks',
+  Dexterity: 'reps',
+  Relationship: 'people'
 };
 
 export const CATEGORY_COLORS: Record<Category, string> = {
-  Fitness: 'bg-blue-900/30 text-blue-400 border-blue-800/50',
-  Study: 'bg-purple-900/30 text-purple-400 border-purple-800/50',
-  Skill: 'bg-amber-900/30 text-amber-400 border-amber-800/50',
-  Mind: 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50',
-  Health: 'bg-rose-900/30 text-rose-400 border-rose-800/50',
+  Strength: 'bg-red-900/30 text-red-400 border-red-800/50',
+  Endurance: 'bg-blue-900/30 text-blue-400 border-blue-800/50',
+  Intelligence: 'bg-purple-900/30 text-purple-400 border-purple-800/50',
+  Focus: 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50',
   Discipline: 'bg-zinc-800 text-zinc-300 border-zinc-700',
-  Social: 'bg-pink-900/30 text-pink-400 border-pink-800/50'
+  Dexterity: 'bg-amber-900/30 text-amber-400 border-amber-800/50',
+  Relationship: 'bg-pink-900/30 text-pink-400 border-pink-800/50'
 };
 
 export const RANK_THRESHOLDS = [
@@ -35,7 +55,6 @@ export const RANK_THRESHOLDS = [
   { level: 100, rank: Rank.ETERNAL_MONARCH }
 ];
 
-export const CATEGORIES: Category[] = ['Fitness', 'Study', 'Skill', 'Mind', 'Health', 'Discipline', 'Social'];
 export const DIFFICULTIES: Difficulty[] = ['EASY', 'MEDIUM', 'HARD', 'INSANE'];
 
 export const BASE_XP_PER_LOG = 10;
