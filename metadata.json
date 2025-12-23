@@ -1,0 +1,5 @@
+{
+  "name": "Monarch OS - RPG Daily Logger",
+  "description": "A Notion-style self-improvement system that converts daily logs into XP, levels, and stats with AI-driven progress analysis and personalized quests.",
+  "requestFramePermissions": []
+}
