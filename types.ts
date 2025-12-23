@@ -3,6 +3,12 @@ export type Category = 'Strength' | 'Endurance' | 'Intelligence' | 'Focus' | 'Di
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'INSANE';
 
+export interface User {
+  email: string;
+  password?: string; // Only stored in mock DB
+  createdAt: string;
+}
+
 export interface Log {
   id: string;
   name: string;
@@ -51,6 +57,20 @@ export interface Progression {
   xp: number;
   xpToNext: number;
   rank: Rank;
+  streak: number;
+  maxStreak: number;
+  activeDays: number;
+  totalLogs: number;
+}
+
+export interface Achievement {
+  id: string;
+  name: string; 
+  label: string; 
+  description: string;
+  iconType: 'TEMPORAL' | 'STREAK' | 'ATTRIBUTE';
+  tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM';
+  dateEarned: string;
 }
 
 export interface Interruption {

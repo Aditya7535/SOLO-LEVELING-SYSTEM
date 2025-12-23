@@ -1,8 +1,47 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Log, UserStats, AIQuest, Interruption } from "../types";
+import { Log, UserStats, AIQuest, Interruption, Achievement } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+export const forgeAchievement = async (label: string, stats: UserStats): Promise<Partial<Achievement>> => {
+  const prompt = `
+    The user has just reached a major milestone in Monarch OS: "${label}".
+    Current Stats: ${JSON.stringify(stats)}
+
+    Analyze the stats and "forge" a unique title and short description for this achievement.
+    - If Strength/Endurance is high: Use "Warrior/Vanguard" themes.
+    - If Intelligence/Focus is high: Use "Scholar/Architect/Mind" themes.
+    - If Relationship is high: Use "Empath/Leader" themes.
+    
+    Milestone Label: ${label}
+
+    Respond in strict JSON format.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            name: { type: Type.STRING },
+            description: { type: Type.STRING },
+          },
+          required: ["name", "description"],
+        },
+      },
+    });
+
+    const jsonStr = response.text?.trim();
+    return jsonStr ? JSON.parse(jsonStr) : { name: `${label} Milestone`, description: "A testament to your consistency." };
+  } catch (error) {
+    return { name: `${label} Milestone`, description: "System recorded your progress." };
+  }
+};
 
 export const generateQuests = async (logs: Log[], stats: UserStats): Promise<AIQuest[]> => {
   const prompt = `
@@ -13,14 +52,13 @@ export const generateQuests = async (logs: Log[], stats: UserStats): Promise<AIQ
     Stats available: strength, endurance, intelligence, focus, discipline, dexterity, relationship.
     
     Generate 2 personalized "Daily Quests". 
-    CRITICAL: If the 'relationship' stat is lower than others, prioritize 'Relationship' category tasks (e.g., reaching out to mentors, networking, or helping others).
     Focus on balancing the weakest stat or pushing consistency.
     Respond in strict JSON format.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -44,7 +82,6 @@ export const generateQuests = async (logs: Log[], stats: UserStats): Promise<AIQ
     const jsonStr = response.text?.trim();
     return jsonStr ? JSON.parse(jsonStr) : [];
   } catch (error) {
-    console.error("Failed to generate quests", error);
     return [];
   }
 };
@@ -56,18 +93,12 @@ export const generateSystemInterruption = async (lastLog: Log, stats: UserStats)
     Global Stats: ${JSON.stringify(stats)}
 
     Create an URGENT SYSTEM INTERRUPTION.
-    - If the activity was 'Intelligence', create a 'QUIZ' related to general knowledge or logic.
-    - If the activity was 'Strength' or 'Endurance', create an 'EMERGENCY_TASK' (a physical movement).
-    - If the activity was 'Relationship', create a 'QUIZ' about emotional intelligence, empathy, or social dynamics.
-    - If the activity was 'Focus', create a 'QUIZ' about mindfulness or logic.
-    
-    The reward must be proportional to stat weakness.
-    Respond in strict JSON format matching the Interruption interface.
+    Respond in strict JSON format.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -96,28 +127,17 @@ export const generateSystemInterruption = async (lastLog: Log, stats: UserStats)
 };
 
 export const getSystemAnalysis = async (query: string, logs: Log[], stats: UserStats): Promise<string> => {
-  const prompt = `
+  const systemInstruction = `
     You are the System Intelligence of Monarch OS.
-    Context:
-    Logs: ${JSON.stringify(logs)}
-    Stats: ${JSON.stringify(stats)}
-    
     Stats tracked: Strength, Endurance, Intelligence, Focus, Discipline, Dexterity, Relationship.
-    
-    User Query: "${query}"
-    
-    Rules:
-    - Respond like a cold, efficient system notification.
-    - Reference specific logs (e.g., "Your Relationship stat increased because you logged 'Relationship' activity 'Family Dinner'").
-    - Explain causality explicitly. 
-    - Identify if the user is neglecting specific attributes.
-    - No fluff. No emojis.
+    Respond like a cold, efficient system notification. No fluff. No emojis.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
+      model: "gemini-3-pro-preview",
+      contents: `User Query: "${query}"\nContext Logs: ${JSON.stringify(logs)}\nStats: ${JSON.stringify(stats)}`,
+      config: { systemInstruction },
     });
     return response.text || "Error: System communication failed.";
   } catch (error) {

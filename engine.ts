@@ -22,11 +22,61 @@ export const calculateProgression = (logs: Log[]): Progression => {
 
   const rankInfo = RANK_THRESHOLDS.slice().reverse().find(t => level >= t.level) || RANK_THRESHOLDS[0];
 
+  // Streak & Active Days Calculation
+  const uniqueDates = Array.from(new Set(completedLogs.map(l => l.date.split('T')[0]))).sort();
+  let currentStreak = 0;
+  let maxStreak = 0;
+  let tempStreak = 0;
+  
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  if (uniqueDates.length > 0) {
+    for (let i = 0; i < uniqueDates.length; i++) {
+      if (i > 0) {
+        const d1 = new Date(uniqueDates[i-1]);
+        const d2 = new Date(uniqueDates[i]);
+        const diff = (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24);
+        
+        if (diff === 1) {
+          tempStreak++;
+        } else {
+          tempStreak = 1;
+        }
+      } else {
+        tempStreak = 1;
+      }
+      maxStreak = Math.max(maxStreak, tempStreak);
+    }
+
+    const lastDate = uniqueDates[uniqueDates.length - 1];
+    if (lastDate === today || lastDate === yesterday) {
+      // Find current active streak
+      let cur = 0;
+      let checkDate = new Date(lastDate);
+      for(let i = uniqueDates.length - 1; i >= 0; i--) {
+        const d = new Date(uniqueDates[i]);
+        const diff = (checkDate.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
+        if (diff <= 1) {
+          cur++;
+          checkDate = d;
+        } else {
+          break;
+        }
+      }
+      currentStreak = cur;
+    }
+  }
+
   return {
     level,
     xp: Math.floor(totalXP),
     xpToNext: xpRequired,
-    rank: rankInfo.rank
+    rank: rankInfo.rank,
+    streak: currentStreak,
+    maxStreak: maxStreak,
+    activeDays: uniqueDates.length,
+    totalLogs: completedLogs.length
   };
 };
 
@@ -55,7 +105,6 @@ export const calculateStats = (logs: Log[]): UserStats => {
     });
   });
 
-  // Discipline is special: influenced by total completed vs total logs
   const completionRate = logs.length > 0 ? (completedLogs.length / logs.length) * 100 : 0;
   stats.discipline = Math.floor(stats.discipline + completionRate);
 

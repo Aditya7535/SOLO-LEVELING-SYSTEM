@@ -12,33 +12,57 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --sat: env(safe-area-inset-top);
+        --sar: env(safe-area-inset-right);
+        --sab: env(safe-area-inset-bottom);
+        --sal: env(safe-area-inset-left);
+      }
+
       body {
-        background-color: #09090b;
+        background-color: #000000;
         color: #fafafa;
         font-family: 'Inter', sans-serif;
-        overscroll-behavior-y: contain;
+        margin: 0;
+        padding: 0;
+        /* Lock down scrolling to simulate native app */
+        overflow: hidden;
+        height: 100vh;
+        height: 100dvh;
+        width: 100vw;
+        position: fixed;
+        /* Prevent elastic bounce on iOS */
+        overscroll-behavior: none;
         -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        user-select: none;
       }
+
       .mono {
         font-family: 'JetBrains Mono', monospace;
       }
-      /* Custom scrollbar for desktop */
-      @media (min-width: 768px) {
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #27272a;
-          border-radius: 10px;
-        }
+
+      /* Native-like scroll container */
+      .app-scroll-container {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        height: 100%;
+        scrollbar-width: none; /* Firefox */
       }
+      .app-scroll-container::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+      }
+
+      /* Allow text selection only in inputs */
+      input, textarea {
+        user-select: text !important;
+        -webkit-user-select: text !important;
+      }
+
       /* Safe area insets for mobile */
-      .pb-safe {
-        padding-bottom: env(safe-area-inset-bottom);
-      }
+      .pt-safe { padding-top: var(--sat); }
+      .pb-safe { padding-bottom: var(--sab); }
+      .px-safe { padding-left: var(--sal); padding-right: var(--sar); }
       
       @keyframes blink {
         0%, 100% { opacity: 1; }
@@ -46,6 +70,15 @@
       }
       .cursor-blink {
         animation: blink 1s infinite;
+      }
+
+      /* Tab transition simulation */
+      .tab-content {
+        animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      @keyframes slideUp {
+        from { transform: translateY(10px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
       }
     </style>
   <script type="importmap">
